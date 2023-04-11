@@ -3,6 +3,7 @@ IMAGE_DIR=$(PLATFORM_DIR)/images
 MODULES_DIR=$(IMAGE_DIR)/modules
 MAKE_JOBS?=-j$(shell nproc)
 CLEAN?=n
+MODULES?=n
 
 ## uboot parameters
 export UBOOT_DIR=$(PLATFORM_DIR)/u-boot
@@ -14,7 +15,11 @@ export KERNEL_DIR=$(PLATFORM_DIR)/kernel/kernel-4.9
 KERNEL_ARCH=arm64
 KERNEL_CONFIG=tegra_defconfig 
 KERNEL_TARGET=zImage
-KERNEL_INSTALL_PATH=$(IMAGE_DIR)/kernel
+KERNEL_INSTALL_PATH=$(IMAGE_DIR)
+KERNEL_DTBS=tegra210-p3448-0002-p3449-0000-b00.dtb
+
+KERNEL_DTB_INSTALL_PATH=$(KERNEL_INSTALL_PATH)/dtb
+KERNEL_MODULES_INSTALL_PATH=$(KERNEL_INSTALL_PATH)/modules
 
 ## DTBS for jetson nano
 # tegra210-p3448-0003-p3542-0000.dtb
@@ -89,9 +94,16 @@ uboot: $(uboot-y)
 $(KERNEL_INSTALL_PATH):
 	mkdir -p $(KERNEL_INSTALL_PATH)
 
-linux_check: $(KERNEL_INSTALL_PATH)
+$(KERNEL_DTB_INSTALL_PATH):
+	mkdir -p $(KERNEL_DTB_INSTALL_PATH)
+
+$(KERNEL_MODULES_INSTALL_PATH):
+	mkdir -p $(KERNEL_MODULES_INSTALL_PATH)
+
+linux_check: $(KERNEL_INSTALL_PATH) $(KERNEL_DTB_INSTALL_PATH) $(KERNEL_MODULES_INSTALL_PATH)
 
 KERNEL_OPTIONS=ARCH=$(KERNEL_ARCH) LOCALVERSION="-tegra" INSTALL_PATH=$(KERNEL_INSTALL_PATH) CROSS_COMPILE=$(CROSS_COMPILE)
+#KERNEL_OPTIONS=ARCH=$(KERNEL_ARCH) LOCALVERSION="-tegra" CROSS_COMPILE=$(CROSS_COMPILE)
 
 linux_clean: linux_check
 	$(MAKE) -C $(KERNEL_DIR) $(KERNEL_OPTIONS) mrproper
@@ -109,30 +121,26 @@ linux_dtbs: linux_check
 linux_build: linux_check
 	$(MAKE) -C $(KERNEL_DIR) $(MAKE_JOBS) $(KERNEL_OPTIONS) --output-sync=target $(KERNEL_TARGET)
 
-linux_modules_build: linux_check
+linux_modules: linux_check
 	$(MAKE) -C $(KERNEL_DIR) $(MAKE_JOBS) $(KERNEL_OPTIONS) --output-sync=target modules
+
+linux_modules_install:linux_check
+	$(MAKE) -C $(KERNEL_DIR) $(KERNEL_OPTIONS) INSTALL_MOD_PATH=$(KERNEL_MODULES_INSTALL_PATH) modules_install
 
 .PHONY: linux_images_install linux_dtbs_install linux_modules_install
 
-# linux_images_install:linux_check
-# 	@echo "Install $(KERNEL_DIR)/arch/$(KERNEL_ARCH)/boot/$(KERNEL_TARGET) to $(IMAGE_DIR)"
-# 	cp -f $(KERNEL_DIR)/arch/$(KERNEL_ARCH)/boot/$(KERNEL_TARGET) $(IMAGE_DIR)/
-
-# linux_dtbs_install:linux_check
+linux_install:linux_check
+	@echo "Install $(KERNEL_DIR)/arch/$(KERNEL_ARCH)/boot/Image to $(KERNEL_INSTALL_PATH)"
+	cp -f $(KERNEL_DIR)/arch/$(KERNEL_ARCH)/boot/Image $(KERNEL_INSTALL_PATH)/
+	cd $(KERNEL_DIR)/arch/$(KERNEL_ARCH)/boot/dts/ && cp $(KERNEL_DTBS) $(KERNEL_DTB_INSTALL_PATH)
 	
-
-# linux_modules_install:linux_check
-# 	$(MAKE) -C $(KERNEL_DIR) $(KERNEL_OPTIONS) \
-# 	INSTALL_MOD_PATH=$(MODULES_DIR) modules_install
-
-#linux_install: linux_images_install linux_dtbs_install linux_modules_install
-
 linux-$(CLEAN) = linux_clean
 linux-y += linux_config
 linux-y += linux_build
 linux-y += linux_dtbs
-linux-n += linux_modules_build
-#linux-y += linux_install 
+linux-y += linux_install 
+linux-$(MODULES) += linux_modules 
+linux-$(MODULES) += linux_modules_install
 
 linux: $(linux-y)
 
