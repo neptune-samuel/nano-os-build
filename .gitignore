@@ -1,5 +1,7 @@
 /tmp_kernel
 /tmp_uboot
+/images
+/toolchains/*
 /u-boot/arch/arm/include/asm/arch
 /u-boot/examples/standalone/hello_world
 /u-boot/examples/standalone/hello_world.srec
