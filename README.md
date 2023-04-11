@@ -29,6 +29,18 @@ for kernel
 
 > make linux 
 
+#### DTS修改
+请注意：
+官方并没有使用kernel/arch/arm64/boot/dts目录中的DTS文件，而是使用外面的hardware目录中的DTS文件，在内核的scripts/Kbuild.include文件中，引用了这个目录。
+
+```sh
+
+scripts/Kbuild.include:tegra-dtstree = $(NV_BUILD_KERNEL_DTS_ROOT)
+scripts/Kbuild.include:tegra-dtstree = $(srctree)/../../hardware/nvidia
+scripts/Kbuild.include:tegra-root-dtstree = $(subst ^$(realpath $(tegra-dtstree)/../..)/,,^$(realpath $(srctree)/arch/arm64/boot/dts))
+
+```
+
 ### 输出的文件 
 
 生成的文件在images目录
