@@ -1,4 +1,6 @@
 /.vscode-ctags
+/released
+/rootfs
 /tmp_kernel
 /tmp_uboot
 /images

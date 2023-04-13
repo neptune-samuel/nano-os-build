@@ -1,5 +1,33 @@
 ## 如何制作NANO系统镜像 
 
+### 组件
+
+UBOOT
+内核： 内核镜像，DTB，内核模块 
+OVERLAY替换文件 
+
+基础文件系统: NVIDIA 官方发布
+SDKMNANGER安装环境 
+
+rm -rf image
+下面的编译选项可选 
+make linux
+make uboot
+make rootfs 
+
+发布，生成相应的压缩包，放在released目录
+make release
+
+git tag 
+
+将压缩包放入烧录环境
+
+解压，执行安装脚本
+
+执行烧录命令
+
+
+
 ### 重做镜像
 
 - 编译内核(内核镜像，DTB，内核模块)

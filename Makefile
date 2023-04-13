@@ -2,6 +2,7 @@ PLATFORM_DIR=$(shell pwd)
 IMAGE_DIR=$(PLATFORM_DIR)/images
 MODULES_DIR=$(IMAGE_DIR)/modules
 ROOTFS_DIR=$(PLATFORM_DIR)/rootfs
+RELEASED_DIR=$(PLATFORM_DIR)/released
 MAKE_JOBS?=-j$(shell nproc)
 CLEAN?=n
 MODULES?=n
@@ -173,7 +174,7 @@ linux_menuconfig:
 
 .PHONY: rootfs rootfs_overlays
 
-FS_VERSION:=V$(V_DATE)
+FS_VERSION:=v$(V_DATE)
 ROOTFS_OVERLAYS:=$(IMAGE_DIR)/rootfs-overlays.tgz 
 
 rootfs_overlays:
@@ -185,6 +186,22 @@ rootfs_overlays:
 	echo "Build rootfs overlay ok"
 
 rootfs: rootfs_overlays
+
+
+.PHONY: release 
+
+RELEASED_NAME:=neptune-nano-$(FS_VERSION)
+CURRENT_RELEASED_DIR:=$(RELEASED_DIR)/$(RELEASED_NAME)
+CURRENT_RELEASED_TGZ:=$(RELEASED_DIR)/$(RELEASED_NAME).tgz 
+
+release:
+	rm -rf $(CURRENT_RELEASED_DIR)/* $(CURRENT_RELEASED_TGZ)
+	mkdir -p $(CURRENT_RELEASED_DIR)
+	cd $(IMAGE_DIR) && tar czf ../images.tgz * && cd .. && tar xvf images.tgz -C $(CURRENT_RELEASED_DIR) && rm -f images.tgz 
+	cp -f CHANGELOG.md $(CURRENT_RELEASED_DIR)/
+	cp -f scripts/install_to_l4t.sh $(CURRENT_RELEASED_DIR)/install.sh 
+	cd $(RELEASED_DIR) && tar czf $(CURRENT_RELEASED_TGZ) $(RELEASED_NAME)
+	@echo "Release file: "$(RELEASED_NAME).tgz " is ready"
 
 .PHONY: dump 
 dump:
