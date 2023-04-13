@@ -1,9 +1,14 @@
 PLATFORM_DIR=$(shell pwd)
 IMAGE_DIR=$(PLATFORM_DIR)/images
 MODULES_DIR=$(IMAGE_DIR)/modules
+ROOTFS_DIR=$(PLATFORM_DIR)/rootfs
 MAKE_JOBS?=-j$(shell nproc)
 CLEAN?=n
 MODULES?=n
+
+## build time info
+NOW_SECOND=$(shell date -d "now" +"%s")
+V_DATE=$(shell date +"%Y%m%d" -d @$(NOW_SECOND))
 
 ## uboot parameters
 export UBOOT_DIR=$(PLATFORM_DIR)/u-boot
@@ -33,6 +38,10 @@ KERNEL_MODULES_INSTALL_PATH=$(KERNEL_INSTALL_PATH)/modules
 # tegra210-p3448-0002-p3449-0000-a02.dtb
 # tegra210-p3448-0000-p3449-0000-b00-hdmi-dsi.dtb
 
+## 根文件系统 
+PREBUILT_ROOTFS:=zips/Tegra_Linux_Sample-Root-Filesystem_R32.7.3_aarch64.tbz2
+
+
 ## load toolchain rules
 include toolchain.mk 
 
@@ -61,6 +70,20 @@ help:
 	@echo "  _c=[y|n] : enable clean build for target"
 	@echo "  _j=n     : set build jobs"
 	@echo ""
+	@echo " -- Show environments --"
+	@echo " make dump "
+	@echo ""
+	@echo " -- Build uboot --"
+	@echo " make [_c=y] uboot "
+	@echo ""
+	@echo " -- Build linux --"
+	@echo " make [_c=y] [MODULES=y] linux"
+	@echo "  - MODULES=y -- build kernel modules "
+	@echo ""
+	@echo " -- Linux Menuconfig --"
+	@echo " make linux_menuconfig"
+	@echo ""
+
 
 ## for uboot 
 .PHONY: uboot_config uboot_clean uboot_build uboot_install uboot
@@ -148,9 +171,32 @@ linux_menuconfig:
 	$(MAKE) -C $(KERNEL_DIR) ARCH=$(KERNEL_ARCH) menuconfig		
 
 
+.PHONY: rootfs rootfs_overlays
+
+FS_VERSION:=V$(V_DATE)
+ROOTFS_OVERLAYS:=$(IMAGE_DIR)/rootfs-overlays.tgz 
+
+rootfs_overlays:
+	rm -rf $(ROOTFS_DIR) overlays.tgz 
+	mkdir -p $(ROOTFS_DIR)
+	cd overlays && tar czf ../overlays.tgz * && cd .. && tar xvf overlays.tgz -C $(ROOTFS_DIR) && rm -f overlays.tgz 
+	echo $(FS_VERSION) > $(ROOTFS_DIR)/etc/neptune_version
+	cd $(ROOTFS_DIR) && tar czf $(ROOTFS_OVERLAYS) *
+	echo "Build rootfs overlay ok"
+
+rootfs: rootfs_overlays
+
 .PHONY: dump 
 dump:
 	@echo "CLEAN="$(CLEAN)
 	@echo "MAKE_JOBS="$(MAKE_JOBS)
-	$(CC) -v 
+	@echo "UBOOT_DIR="$(UBOOT_DIR)
+	@echo "UBOOT_CONFIG="$(UBOOT_CONFIG)
+	@echo "KERNEL_DIR="$(KERNEL_DIR)
+	@echo "KERNEL_ARCH=="$(KERNEL_ARCH)
+	@echo "KERNEL_CONFIG="$(KERNEL_CONFIG)
+	@echo "KERNEL_DTBS="$(KERNEL_DTBS)
+	@echo ""
+	@echo "== gcc toolchain info =="
+	@$(CC) -v 
 

@@ -45,3 +45,15 @@ scripts/Kbuild.include:tegra-root-dtstree = $(subst ^$(realpath $(tegra-dtstree)
 
 生成的文件在images目录
 
+### 修改日志
+
+[Release Note](CHANGELOG.md)
+
+### 如何安装ROS2-FOXY
+
+[install_ros2_foxy](docs/install_ros2_foxy.md)
+
+### 如何制作系统镜像 
+
+[build_os_image](docs/build_os_image.md)
+
