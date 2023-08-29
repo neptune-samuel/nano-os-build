@@ -1,0 +1,13 @@
+
+ifdef M
+CONFIG_OSMSG=y
+CONFIG_EXTGPIO=y
+CONFIG_PWMBEEPER=y
+endif
+
+## drivers
+driver-$(CONFIG_OSMSG) += osmsg
+driver-$(CONFIG_EXTGPIO) += extgpio
+driver-$(CONFIG_PWMBEEPER) += pwmbeeper 
+
+obj-y := $(foreach obj,$(driver-y),$(obj)/)

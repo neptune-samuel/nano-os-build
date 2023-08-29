@@ -237,12 +237,13 @@
 						<TEGRA_SOCTHERM_THROT_LEVEL_HIGH>;
 				};
 			};
-			override@3 {
-				target = <&{/leds}>;
-				_overlay_ {
-					status = "okay";
-				};
-			};
+			// 不要使用这个LED，N1中使用了这个引脚表示PLC状态 
+			// override@3 {
+			// 	target = <&{/leds}>;
+			// 	_overlay_ {
+			// 		status = "okay";
+			// 	};
+			//};
 		};
 	};
 };

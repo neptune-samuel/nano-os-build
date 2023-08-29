@@ -1,0 +1,9 @@
+/.pwm_beeper.o.cmd
+/.pwmbeeper.ko.cmd
+/.pwmbeeper.mod.o.cmd
+/.pwmbeeper.o.cmd
+/.tmp_versions/
+/Module.symvers
+/modules.order
+/pwmbeeper.ko
+/pwmbeeper.mod.c
