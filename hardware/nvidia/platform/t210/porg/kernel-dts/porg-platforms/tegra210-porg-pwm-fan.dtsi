@@ -26,7 +26,7 @@
 		step_time = <100>; /* mesecs */
 		state_cap = <7>;
 		active_pwm_max = <255>;
-		tach_gpio =  <&gpio TEGRA_GPIO(Z, 2) GPIO_ACTIVE_LOW>; /* TEGRA_GPIO_PZ2 */
+		tach_gpio =  <&gpio TEGRA_GPIO(Z, 1) GPIO_ACTIVE_LOW>; /* TEGRA_GPIO_PZ2 */
 		pwm_gpio = <&gpio TEGRA_GPIO(E, 7) GPIO_ACTIVE_LOW>; /* TEGRA_GPIO_PE7 */
 		pwm_polarity = <PWM_POLARITY_NORMAL>;
 		suspend_state = <0>;
