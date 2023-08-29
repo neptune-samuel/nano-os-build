@@ -1,5 +1,12 @@
 #!/bin/sh
 
+## only accept start
+case "$1" in
+  start) ;;
+  stop|restart|force-reload) exit 0 ;;
+  *) echo "Usage: $0 {start|stop|restart|force-reload}" >&2; exit 1 ;;
+esac
+
 echo "==> Initialize gpios for neptune-n1 hardware-V2.0"
 
 EXTGPIO_DIR=/sys/devices/platform/extgpio
