@@ -1,0 +1,18 @@
+menu "EXT-GPIO Driver Options"
+	depends on CONFIG_EXTGPIO
+
+	config CONFIG_EXTGPIO_USE_DTS
+		bool "Load gpios from dts file"
+		default n
+	
+	config CONFIG_OSMSG_NETLINK
+		bool "Use OSMSG netlink to send event"
+		default n
+
+	config CONFIG_SOC_GPIO_NAME_SSD2X2
+		bool "Build for SSD2x2(gpio name)"
+		default n
+
+
+
+endmenu

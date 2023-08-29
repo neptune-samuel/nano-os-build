@@ -1,0 +1,73 @@
+hal_gpio {
+    compatible = "extgpio-generic";
+    status = "okay";
+
+    gpios{
+            /* -- gpio options  --
+                    gpio = <&gpio4 RK_PA3 GPIO_ACTIVE_LOW>;
+                    direction-in;
+                    not-request;
+                    active-on-boot;   -- not used now
+                    active-on-linux;  -- set active on linux booting
+                    function = <1>;  -- 0 - default, 1 - led , 2 - button, 3 - buzzer, 4 - interrupt
+                    init = <0xc0c0c0c0, 0xffffffff>;
+                    status = "disabled";
+            */
+            /* leds */
+            led_run         { gpio = <&gpio4 RK_PA3 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_upcom       { gpio = <&gpio1 RK_PA5 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_alarm       { gpio = <&gpio4 RK_PA0 GPIO_ACTIVE_LOW>; function = <1>; };
+    
+            led_com1        { gpio = <&gpio4 RK_PB6 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com2        { gpio = <&gpio4 RK_PB2 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com3        { gpio = <&gpio4 RK_PD6 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com4        { gpio = <&gpio4 RK_PB4 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com5        { gpio = <&gpio4 RK_PA1 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com6        { gpio = <&gpio1 RK_PA2 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com7        { gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_LOW>; function = <1>; };
+            led_com8        { gpio = <&gpio1 RK_PA4 GPIO_ACTIVE_LOW>; function = <1>; };
+    
+            /* reset and power control */
+            phy_reset   { gpio = <&gpio0 RK_PC2 GPIO_ACTIVE_LOW>;  };
+            usb_host_power   { gpio = <&gpio4 RK_PB3 GPIO_ACTIVE_HIGH>; active-on-linux;};
+            usb_hub_reset    { gpio = <&gpio0 RK_PC3 GPIO_ACTIVE_LOW>; };
+            /* buzzer */
+            buzzer          { gpio = <&gpio2 RK_PA4 GPIO_ACTIVE_HIGH>; function = <3>; };
+    
+            /* gpio */
+            ext_board   { gpio = <&gpio4 RK_PB5 GPIO_ACTIVE_LOW>; direction-in; };
+    
+            /* di11-di18 */
+            di11        { gpio = <&gpio2 RK_PB2 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di12        { gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di13        { gpio = <&gpio2 RK_PB3 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di14        { gpio = <&gpio1 RK_PA6 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di15        { gpio = <&gpio1 RK_PA7 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di16        { gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di17        { gpio = <&gpio1 RK_PB1 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di18        { gpio = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+    
+            /* di1 di2 door detect */
+            di1         { gpio = <&gpio4 RK_PA2 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};
+            di2         { gpio = <&gpio0 RK_PB0 GPIO_ACTIVE_HIGH>; direction-in; function = <4>;};  
+    
+            /* dc 12v control */
+            dc12v1          { gpio = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>; function = <5>;};
+            dc12v2          { gpio = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>; function = <5>;};
+            dc12v3          { gpio = <&gpio1 RK_PB3 GPIO_ACTIVE_HIGH>; function = <5>;};
+    
+            /* using com7 and com8 for debug */
+            //do0_data  { gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>; not-request; };
+            //do0_clock { gpio = <&gpio1 RK_PA4 GPIO_ACTIVE_HIGH>; not-request; };
+    
+            /* do, for debug only */
+            do1_data  { gpio = <&gpio0 RK_PB1 GPIO_ACTIVE_HIGH>; not-request; };
+            do1_clock { gpio = <&gpio2 RK_PA5 GPIO_ACTIVE_HIGH>; not-request; };
+            do2_data  { gpio = <&gpio2 RK_PA6 GPIO_ACTIVE_HIGH>; not-request; };
+            do2_clock { gpio = <&gpio4 RK_PA5 GPIO_ACTIVE_HIGH>; not-request; };
+            do3_data  { gpio = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>; not-request; };
+            do3_clock { gpio = <&gpio4 RK_PA4 GPIO_ACTIVE_HIGH>; not-request; };
+            do4_data  { gpio = <&gpio2 RK_PB1 GPIO_ACTIVE_HIGH>; not-request; };
+            do4_clock { gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>; not-request; };
+    };
+};
