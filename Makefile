@@ -3,6 +3,7 @@ IMAGE_DIR=$(PLATFORM_DIR)/images
 MODULES_DIR=$(IMAGE_DIR)/modules
 ROOTFS_DIR=$(PLATFORM_DIR)/rootfs
 RELEASED_DIR=$(PLATFORM_DIR)/released
+export DRIVER_DIR=$(PLATFORM_DIR)/driver
 MAKE_JOBS?=-j$(shell nproc)
 CLEAN?=n
 MODULES?=n
@@ -85,6 +86,9 @@ help:
 	@echo " make linux_menuconfig"
 	@echo ""
 
+.PHONY: clean 
+
+clean: uboot_clean linux_clean
 
 ## for uboot 
 .PHONY: uboot_config uboot_clean uboot_build uboot_install uboot
@@ -170,7 +174,7 @@ linux: $(linux-y)
 
 linux_menuconfig:
 	$(MAKE) -C $(KERNEL_DIR) ARCH=$(KERNEL_ARCH) menuconfig		
-
+ 
 
 .PHONY: rootfs rootfs_overlays
 
@@ -217,3 +221,4 @@ dump:
 	@echo "== gcc toolchain info =="
 	@$(CC) -v 
 
+include $(DRIVER_DIR)/Makefile 
