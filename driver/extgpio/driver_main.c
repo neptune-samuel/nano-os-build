@@ -111,6 +111,7 @@ static void gpio_timer_handle_new(struct timer_list *t)
 
 #endif 
 
+#ifdef CONFIG_EXTGPIO_USE_DTS
 /**
  * @brief 解析DTS，并生成GPIO结节，必须已初始化了相应的SYSFS NODES
  * 
@@ -131,13 +132,13 @@ static int import_gpio_from_dts(struct gpio_data *gdata)
     root = of_get_child_by_name(gdata->dev->of_node, "gpios");
     if (!root) 
     {
-        dev_warn(gdata->dev, "Could not find 'gpios' node\n");
+        printk(KERN_WARNING LOG_TAG "Could not find 'gpios' node\n");
         return 0;
     }
 
     if (!of_device_is_available(root))
     {
-        dev_warn(gdata->dev, "Node 'gpios' is disabled\n");
+        printk(KERN_WARNING LOG_TAG "Node 'gpios' is disabled\n");
         return 0;
     }
     
@@ -159,7 +160,7 @@ static int import_gpio_from_dts(struct gpio_data *gdata)
             if (gpio < 0)
             {
                 ret = gpio;
-                dev_warn(gdata->dev, "Parse gpio node '%s' failed, ret = %d\n", child_node->name, ret);
+                printk(KERN_WARNING LOG_TAG "Parse gpio node '%s' failed, ret = %d\n", child_node->name, ret);
                 // try private type of gpio defines
                 private_gpio_dt = 1;
             }
@@ -174,7 +175,7 @@ static int import_gpio_from_dts(struct gpio_data *gdata)
             ret = of_property_read_u32(child_node, "gpio", &value);
             if (ret) 
             {
-                dev_warn(gdata->dev, "Parse gpio node '%s' failed, ret = %d\n", child_node->name, ret);
+                printk(KERN_WARNING LOG_TAG "Parse gpio node '%s' failed, ret = %d\n", child_node->name, ret);
                 continue;
             }
 
@@ -217,8 +218,8 @@ static int import_gpio_from_dts(struct gpio_data *gdata)
             og->init_mask = array[1];
         }
 
-        dev_info(gdata->dev, "Add gpio '%s' with pin %d(%s) (active:%d,in:%d,init:%d,request:%d)\n", og->info.name, og->info.gpio.pin, 
-            extgpio_pin_name(og->info.gpio.pin, buffer), og->info.gpio.active_low,
+        printk(KERN_INFO LOG_TAG "Add gpio '%s' with pin %d(%s) (active:%d,in:%d,init:%d,request:%d)\n", og->info.name, og->info.gpio.pin, 
+            extgpio_pin_name(og->info.gpio.pin, buffer), !og->info.gpio.active_low,
             og->info.gpio.dir_in, og->info.init_active, !og->info.do_not_request);
 
         list_add_tail(&og->list, &gdata->gpios);
@@ -227,6 +228,7 @@ static int import_gpio_from_dts(struct gpio_data *gdata)
     return 1;
 }
 
+#endif // CONFIG_EXTGPIO_USE_DTS
 
 /**
  * @brief 初始化已登记的GPIO
@@ -254,7 +256,7 @@ static int extgpio_init_all(struct gpio_data *gdata)
         num ++;
     }
 
-    dev_info(gdata->dev, "Init %d gpios\n", num);
+    printk(KERN_INFO LOG_TAG "Init %d gpios\n", num);
 
     return num;
 }
@@ -283,7 +285,7 @@ static void extgpio_free_all(struct gpio_data *gdata)
             gpio_free(p->info.gpio.pin);
         }
 
-        dev_info(gdata->dev, "Remove gpio '%s'", p->info.name);
+        printk(KERN_INFO LOG_TAG "Remove gpio '%s'", p->info.name);
 
         extgpio_object_delete(gdata, p);
     }
@@ -329,15 +331,17 @@ int extgpio_init(struct gpio_data *gdata)
     ret = sysfs_create_group(&gdata->dev->kobj, &extgpio_attribute_group);
     if (ret)
     {
-        dev_warn(gdata->dev, "Create extgpio attribute group failed, ret=%d\n", ret);
+        printk(KERN_WARNING LOG_TAG "Create extgpio attribute group failed, ret=%d\n", ret);
         return ret;
     }
 
     // create sysfs nodes for gpios
     gdata->gpio_kobj = kobject_create_and_add("gpios", &gdata->dev->kobj);
 
+#ifdef CONFIG_EXTGPIO_USE_DTS
     // find gpios from dts 
     import_gpio_from_dts(gdata);
+#endif 
 
     // 初始化已登记的GPIO
     gpio_num = extgpio_init_all(gdata);
@@ -352,7 +356,7 @@ int extgpio_init(struct gpio_data *gdata)
     mod_timer(&gdata->gpio_timer, jiffies + GPIO_TIMER_PERIOD);
 
     // 打印信息
-    dev_info(gdata->dev, "Load %d gpios\n", gpio_num);     
+    printk(KERN_INFO LOG_TAG "Load %d gpios\n", gpio_num);     
 
     return 0;
 }
@@ -444,6 +448,7 @@ static struct platform_driver extgpio_driver = {
 };
 
 #ifdef CONFIG_EXTGPIO_USE_DTS 
+
 module_platform_driver(extgpio_driver);
 
 #else 
@@ -451,19 +456,16 @@ module_platform_driver(extgpio_driver);
 static struct platform_device *extgpio_device;
 
 
-static int extgpio_driver_init(void)
+static int __init extgpio_driver_init(void)
 {
-    platform_driver_register(&extgpio_driver);
-
     extgpio_device = platform_device_register_simple(DRIVER_NAME, -1, NULL, 0);
-
-    return 0;
+    return platform_driver_register(&extgpio_driver);
 }
 
-static void extgpio_driver_exit(void)
-{
-    platform_device_unregister(extgpio_device);
+static void __exit extgpio_driver_exit(void)
+{    
     platform_driver_unregister(&extgpio_driver);
+    platform_device_unregister(extgpio_device);    
 }
 
 module_init(extgpio_driver_init);

@@ -159,7 +159,7 @@ void extgpio_set(gpio_t *gpio, int value)
     // treat as output 
     if (gpio->dir_in)
     {
-        printk(KERN_INFO DRIVER_NAME": warning, trying to set input gpio(%s)\n", extgpio_pin_name(gpio->pin, buffer));
+        printk(KERN_INFO ": warning, trying to set input gpio(%s)\n", extgpio_pin_name(gpio->pin, buffer));
         return ;
     }
     gpio_direction_output(gpio->pin, gpio->active_low ? !value : value);
@@ -337,14 +337,14 @@ struct gpio_object *extgpio_object_new(struct gpio_data * gdata, const char *nam
     og = devm_kzalloc(gdata->dev, sizeof(*og), GFP_KERNEL);
     if (og == NULL)
     {
-        dev_warn(gdata->dev, "devm_kzalloc(%u) failed\n", sizeof(*og));
+        printk(KERN_WARNING LOG_TAG "devm_kzalloc(%lu) failed\n", sizeof(*og));
         return NULL;
     }
 
     og->info.name = devm_kstrdup(gdata->dev, name, GFP_KERNEL);
     if (og->info.name == NULL)
     {
-        dev_warn(gdata->dev, "devm_kzalloc(%s) failed\n", name);
+        printk(KERN_WARNING LOG_TAG "devm_kzalloc(%s) failed\n", name);
         devm_kfree(gdata->dev, og);        
         return NULL;
     }

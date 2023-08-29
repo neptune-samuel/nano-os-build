@@ -9,6 +9,7 @@
 #include "gpio_type.h"
 
 #define DRIVER_NAME      "extgpio"
+#define LOG_TAG  DRIVER_NAME ": "
 
 /**
  * @brief 返回gpio的名称

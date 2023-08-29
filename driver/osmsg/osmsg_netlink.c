@@ -102,11 +102,11 @@ int osmsg_netlink_init(void)
         
     if (!osmsg_netlink_socket) 
     {
-        printk(KERN_ERR "Unable to create osmsg netlink socket!\n");
+        printk(KERN_ERR "unable to create osmsg netlink socket!\n");
         return -ENODEV;
     }
 
-    printk(KERN_INFO "Register OSMSG netlink module\n");
+    printk(KERN_INFO "register osmsg netlink module\n");
 
     return 0;
 }
@@ -118,6 +118,6 @@ void osmsg_netlink_exit(void)
         sock_release(osmsg_netlink_socket->sk_socket);
     }
 
-    printk(KERN_INFO "Unregister OSMSG netlink module\n");    
+    printk(KERN_INFO "unregister osmsg netlink module\n");    
 }
 

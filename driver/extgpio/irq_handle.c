@@ -301,7 +301,7 @@ int extgpio_set_interrupt(struct gpio_data *gdata, struct gpio_object *obj)
     irq = gpio_to_irq(obj->info.gpio.pin);    
     if (irq < 0)
     {
-        dev_err(gdata->dev, "Unable to get irq from %s\n", extgpio_pin_name(obj->info.gpio.pin, name));
+        printk(KERN_ERR LOG_TAG "Unable to get irq from %s\n", extgpio_pin_name(obj->info.gpio.pin, name));
         return -1;
     }
     
@@ -321,14 +321,14 @@ int extgpio_set_interrupt(struct gpio_data *gdata, struct gpio_object *obj)
     ret = devm_request_threaded_irq(gdata->dev, irq, NULL, extgpio_irq_handle, irq_flags, obj->info.name, obj);
     if (ret < 0) 
     {
-        dev_err(gdata->dev, "Request irq(%d) for %s failed, ret = %d\n", irq, obj->info.name, ret);
+        printk(KERN_ERR LOG_TAG "Request irq(%d) for %s failed, ret = %d\n", irq, obj->info.name, ret);
         return -1;
     }
 
     obj->irq = irq;
     obj->with_interrupt = 1;
     obj->irq_in_handle = 0;
-    dev_info(gdata->dev, "Request irq(%d) for %s success\n", irq, obj->info.name);
+    printk(KERN_INFO LOG_TAG "Request irq(%d) for %s success\n", irq, obj->info.name);
 
     return 0;
 }

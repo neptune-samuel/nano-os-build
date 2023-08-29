@@ -30,7 +30,7 @@ ssize_t sysfs_set_gpio(struct kobject *kobj, struct kobj_attribute *attr,
     gpio = extgpio_object_find(gdata, attr->attr.name);
     if (gpio == NULL)
     {
-        printk(KERN_ERR DRIVER_NAME": gpio '%s' empty!!!\n", attr->attr.name);
+        printk(KERN_WARNING LOG_TAG "gpio '%s' empty!!!\n", attr->attr.name);
         return 0;
     }  
 
@@ -45,7 +45,7 @@ ssize_t sysfs_set_gpio(struct kobject *kobj, struct kobj_attribute *attr,
         gpio->info.gpio.dir_in = 1;
         gpio_direction_input(gpio->info.gpio.pin);
 
-        printk(KERN_INFO DRIVER_NAME": gpio '%s' set as input\n", attr->attr.name);
+        printk(KERN_INFO LOG_TAG "gpio '%s' set as input\n", attr->attr.name);
         return count;
     }
     else if ((len == 3) && !strncasecmp(buf, "out", 3))
@@ -53,25 +53,25 @@ ssize_t sysfs_set_gpio(struct kobject *kobj, struct kobj_attribute *attr,
         gpio->info.gpio.dir_in = 0;
         // gpio set will auto set it as output gpio
         // gpio_direction_output(gpio->pin, gpio->active_low ? !value : value); 
-        printk(KERN_INFO DRIVER_NAME": gpio '%s' set as output\n", attr->attr.name);        
+        printk(KERN_INFO LOG_TAG "gpio '%s' set as output\n", attr->attr.name);        
         return count;
     }
     else if ((len == 6) && !strncasecmp(buf, "irq_on", 6))
     {
         if (gpio->with_interrupt)
         {
-            printk(KERN_INFO DRIVER_NAME": gpio '%s' interrupt is already on\n", attr->attr.name);    
+            printk(KERN_INFO LOG_TAG "gpio '%s' interrupt is already on\n", attr->attr.name);    
             return count;            
         }
 
         extgpio_set_interrupt(gdata, gpio);
-        printk(KERN_INFO DRIVER_NAME": gpio '%s' interrupt on\n", attr->attr.name);        
+        printk(KERN_INFO LOG_TAG "gpio '%s' interrupt on\n", attr->attr.name);        
         return count;
     }
     else if ((len == 7) && !strncasecmp(buf, "irq_off", 7))
     {
         extgpio_unset_interrupt(gdata, gpio);
-        printk(KERN_INFO DRIVER_NAME": gpio '%s' interrupt off\n", attr->attr.name);         
+        printk(KERN_INFO LOG_TAG "gpio '%s' interrupt off\n", attr->attr.name);         
         return count;
     }
     
@@ -147,7 +147,7 @@ ssize_t show_gpio_info(struct device *dev, struct device_attribute *attr, char *
 
     if (gdata == NULL)
     {
-        printk(KERN_ERR DRIVER_NAME": gpio data empty!!!\n");
+        printk(KERN_WARNING LOG_TAG "gpio data empty!!!\n");
         return 0;
     }
 
@@ -178,7 +178,7 @@ int sysfs_add_gpio_node(struct gpio_data *gdata, struct gpio_object *gpio)
     ret = sysfs_create_file(gdata->gpio_kobj, &gpio->kobj_attr.attr);
     if (ret)
     {
-        dev_warn(gdata->dev, "Create gpio node '%s' failed, ret=%d\n", gpio->info.name, ret);
+        printk(KERN_WARNING LOG_TAG "Create gpio node '%s' failed, ret=%d\n", gpio->info.name, ret);
     }    
 
     return ret;
@@ -240,7 +240,7 @@ ssize_t sysfs_add_gpio(struct device *dev, struct device_attribute *attr,
                     gpio = extgpio_object_find(gdata, gpioName);
                     if (gpio)
                     {
-                        printk(KERN_ERR DRIVER_NAME": gpio '%s' already exist!!!\n", gpioName);
+                        printk(KERN_WARNING LOG_TAG "gpio '%s' already exist!!!\n", gpioName);
                         return count;
                     }
                 }
@@ -251,14 +251,14 @@ ssize_t sysfs_add_gpio(struct device *dev, struct device_attribute *attr,
 
                     if (!gpio_is_valid(pin))
                     {
-                        printk(KERN_ERR DRIVER_NAME": invalid gpio pin '%d'!!!\n", pin);
+                        printk(KERN_WARNING LOG_TAG "invalid gpio pin '%d'!!!\n", pin);
                         return count;                        
                     }
 
                     gpio = extgpio_object_new(gdata, gpioName, pin, 0, 1); // default is high active input pin                    
                     if (gpio == NULL)
                     {
-                        printk(KERN_ERR DRIVER_NAME": create gpio<%d> object failed!!!\n", pin);
+                        printk(KERN_WARNING LOG_TAG "create gpio<%d> object failed!!!\n", pin);
                         return count;                          
                     }
                 }
@@ -292,8 +292,8 @@ ssize_t sysfs_add_gpio(struct device *dev, struct device_attribute *attr,
                     } 
                     else 
                     {
-                        printk(KERN_INFO DRIVER_NAME": unknown option '%s'!!!\n", input);
-                        printk(KERN_INFO DRIVER_NAME": supported options: in out active-low not-request led button\n");
+                        printk(KERN_WARNING LOG_TAG "unknown option '%s'!!!\n", input);
+                        printk(KERN_WARNING LOG_TAG "supported options: in out active-low not-request led button\n");
                     } 
                 }
                 
@@ -308,12 +308,12 @@ ssize_t sysfs_add_gpio(struct device *dev, struct device_attribute *attr,
 
     if (gpio == NULL)
     {
-        printk(KERN_ERR DRIVER_NAME":unknown gpio line\n");
+        printk(KERN_WARNING LOG_TAG ":unknown gpio line\n");
         return count;                          
     }
 
-    dev_info(gdata->dev, "Add gpio '%s' with pin %d(%s) (active:%d,in:%d,init:%d,request:%d)\n", gpio->info.name, gpio->info.gpio.pin, 
-        extgpio_pin_name(gpio->info.gpio.pin, gpioName), gpio->info.gpio.active_low,
+    printk(KERN_INFO LOG_TAG "Add gpio '%s' with pin %d(%s) (active:%d,in:%d,init:%d,request:%d)\n", gpio->info.name, gpio->info.gpio.pin, 
+        extgpio_pin_name(gpio->info.gpio.pin, gpioName), !gpio->info.gpio.active_low,
         gpio->info.gpio.dir_in, gpio->info.init_active, !gpio->info.do_not_request);
 
     // 添加到队列中
@@ -369,7 +369,7 @@ ssize_t sysfs_remove_gpio(struct device *dev, struct device_attribute *attr,
                 gpio = extgpio_object_find(gdata, input);
                 if (gpio == NULL)
                 {
-                    printk(KERN_ERR DRIVER_NAME": gpio '%s' does not exist!!!\n", input);
+                    printk(KERN_WARNING LOG_TAG "gpio '%s' does not exist!!!\n", input);
                     return count;                          
                 }
 
@@ -385,7 +385,7 @@ ssize_t sysfs_remove_gpio(struct device *dev, struct device_attribute *attr,
                     gpio_free(gpio->info.gpio.pin);
                 }
 
-                dev_info(gdata->dev, "Remove gpio '%s'", gpio->info.name);
+                printk(KERN_INFO LOG_TAG "Remove gpio '%s'", gpio->info.name);
                 // 删除对象
                 extgpio_object_delete(gdata, gpio);
 

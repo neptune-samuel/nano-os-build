@@ -33,6 +33,6 @@ module_init(osmsg_init);
 module_exit(osmsg_exit);
 
 MODULE_AUTHOR("Liu Chuansen <179712066@qq.com>");
-MODULE_DESCRIPTION("OSMSG module for user space application");
+MODULE_DESCRIPTION("osmsg module for user space application");
 MODULE_LICENSE("GPL");
 
