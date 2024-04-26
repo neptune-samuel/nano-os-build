@@ -7,7 +7,7 @@ https://developer.nvidia.com/embedded/linux-tegra-r3273
 ### 环境准备
 
 for uboot
-> sudo apt instal bison flex bc 
+> sudo apt install bison flex bc 
 
 for kernel
 > sudo apt install libncurses5-dev
