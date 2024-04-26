@@ -29,7 +29,7 @@
 	model = "NVIDIA Jetson Nano Developer Kit";
 	compatible ="nvidia,p3449-0000-b00+p3448-0002-b00-sd", "nvidia,jetson-nano", "nvidia,tegra210";
 	neptune,product = "Netptune-N1";
-	neptune,version = "V0.1-20230829";
+	neptune,version = "V0.1(depth-fixed/20240426)";
 	nvidia,dtsfilename = __FILE__;
 
 	sdhci@700b0600 { /* SDMMC4 for EMMC */

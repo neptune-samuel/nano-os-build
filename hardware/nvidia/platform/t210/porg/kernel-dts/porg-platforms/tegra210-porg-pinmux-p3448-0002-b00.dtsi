@@ -352,6 +352,7 @@
 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
 			};
 
+			/*
 			gen1_i2c_scl_pj1 {
 				nvidia,pins = "gen1_i2c_scl_pj1";
 				nvidia,function = "i2c1";
@@ -369,6 +370,7 @@
 				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
 				nvidia,io-high-voltage = <TEGRA_PIN_ENABLE>;
 			};
+			*/
 
 			gen2_i2c_scl_pj2 {
 				nvidia,pins = "gen2_i2c_scl_pj2";
