@@ -34,14 +34,20 @@ add_gpio()
 add_gpio sys_led 39 out
 add_gpio mcu_reset 62 out
 add_gpio mcu_upgrade 66 out
-add_gpio plc_state 65 in 
+add_gpio mcu_boot0 64 out
+add_gpio plc_state 65 in
 add_gpio power_down 216 in active-low
 
-# enable irq 
-if [ -f ${EXTGPIO_GPIOS}/power_down ]; then 
+
+
+
+# enable irq
+if [ -f ${EXTGPIO_GPIOS}/power_down ]; then
 echo "==> enable power_down interrupt"
 echo irq_on > ${EXTGPIO_GPIOS}/power_down
-fi 
+fi
 
 # turn sysled flash
 echo 0xaaaaaaaa > ${EXTGPIO_GPIOS}/sys_led
+
+echo 0 > ${EXTGPIO_GPIOS}/mcu_boot0
