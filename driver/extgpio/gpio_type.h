@@ -83,6 +83,8 @@ struct gpio_data
     /* for gpio */
     struct list_head gpios;
     struct timer_list gpio_timer;
+
+    struct timer_list test_timer;
     
     struct kobject *gpio_kobj;
 };

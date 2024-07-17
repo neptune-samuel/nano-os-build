@@ -40,6 +40,8 @@
 #include <linux/fcntl.h>
 #include <linux/of_gpio.h>
 #include <linux/version.h>
+#include <linux/jiffies.h>
+#include <linux/timer.h>
 
 #include "gpio_type.h"
 #include "lowlevel.h"
@@ -52,7 +54,7 @@
  * 
  */
 #define GPIO_TIMER_PERIOD  (HZ/10)
-
+#define TEST_TIMER_PERIOD  (HZ/200)
 
 /**
  * @brief GPIO的定时器
@@ -65,38 +67,38 @@ static void gpio_timer_handle( unsigned long dummy )
     struct gpio_data *gdata = (struct gpio_data *)dummy;
     struct gpio_object *p;
 
-    list_for_each_entry(p, &gdata->gpios, list)
-    {
-        if (p->pulse.enable)
-        {
-            spin_lock(&p->pulse.lock);
+    // list_for_each_entry(p, &gdata->gpios, list)
+    // {
+    //     if (p->pulse.enable)
+    //     {
+    //         spin_lock(&p->pulse.lock);
 
-            /* mask == 0 treat as full mask */
-            v = p->pulse.control & (1 << p->pulse.offset);
+    //         /* mask == 0 treat as full mask */
+    //         v = p->pulse.control & (1 << p->pulse.offset);
 
-            if (p->pulse.mask && !(p->pulse.mask & (1 << p->pulse.offset)))
-            {
-                /* no looping, set disable */
-                p->pulse.enable = 0;
-            }
-            else 
-            {
-                /* set gpio */
-                extgpio_set(&p->info.gpio, v);
-            }
+    //         if (p->pulse.mask && !(p->pulse.mask & (1 << p->pulse.offset)))
+    //         {
+    //             /* no looping, set disable */
+    //             p->pulse.enable = 0;
+    //         }
+    //         else 
+    //         {
+    //             /* set gpio */
+    //             extgpio_set(&p->info.gpio, v);
+    //         }
 
-            if (p->pulse.offset >= 31)
-            {
-                p->pulse.offset = 0;
-            }
-            else
-            {
-                p->pulse.offset ++;
-            }
+    //         if (p->pulse.offset >= 31)
+    //         {
+    //             p->pulse.offset = 0;
+    //         }
+    //         else
+    //         {
+    //             p->pulse.offset ++;
+    //         }
 
-            spin_unlock(&p->pulse.lock);
-        }
-    }
+    //         spin_unlock(&p->pulse.lock);
+    //     }
+    // }
 
     mod_timer(&gdata->gpio_timer, jiffies + GPIO_TIMER_PERIOD);
 }
@@ -110,6 +112,39 @@ static void gpio_timer_handle_new(struct timer_list *t)
 }
 
 #endif 
+
+/**
+ * @brief GPIO的定时器
+ * 
+ * @param dummy 
+ */
+static void test_timer_handle( unsigned long dummy )
+{
+    int v;
+    struct gpio_data *gdata = (struct gpio_data *)dummy;
+    struct gpio_object *p;
+
+    list_for_each_entry(p, &gdata->gpios, list)
+    {
+        if (p->info.gpio.pin == 39)
+        {
+            //int v = p->pulse.control & 0x01;
+            //extgpio_set(&p->info.gpio, v);
+            //p->pulse.control = (v == 0) ? 1 : 0;
+
+            unsigned long ms;
+            struct timespec64 ts;
+
+            ktime_get_real_ts64(&ts);
+            ms = ts.tv_nsec / 1000000;
+            extgpio_set(&p->info.gpio, (ms <= 50) ? 1 : 0);
+            break;
+        }
+    }
+
+    mod_timer(&gdata->test_timer, jiffies + TEST_TIMER_PERIOD);
+}
+
 
 #ifdef CONFIG_EXTGPIO_USE_DTS
 /**
@@ -354,6 +389,11 @@ int extgpio_init(struct gpio_data *gdata)
     #endif 
 
     mod_timer(&gdata->gpio_timer, jiffies + GPIO_TIMER_PERIOD);
+
+
+    setup_timer(&gdata->test_timer, test_timer_handle, (unsigned long)gdata);
+    mod_timer(&gdata->test_timer, jiffies + TEST_TIMER_PERIOD);
+
 
     // 打印信息
     printk(KERN_INFO LOG_TAG "Load %d gpios\n", gpio_num);     
